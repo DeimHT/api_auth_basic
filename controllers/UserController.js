@@ -11,6 +11,16 @@ router.post('/create', async (req, res) => {
     res.status(response.code).json(response.message);
 });
 
+router.get('/getAllUsers', async (req, res) => {
+    const response = await UserService.getAllUsers();
+    res.status(response.code).json(response.message);
+});
+
+router.get('/findUsers', async (req, res) => {
+    const response = await UserService.findUsers(req);
+    res.status(response.code).json(response.message);
+});
+
 router.get(
     '/:id',
     [

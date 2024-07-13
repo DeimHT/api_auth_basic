@@ -1,5 +1,7 @@
+import { where } from 'sequelize';
 import db from '../dist/db/models/index.js';
 import bcrypt from 'bcrypt';
+import { query } from 'express';
 
 const createUser = async (req) => {
     const {
@@ -53,6 +55,53 @@ const getUserById = async (id) => {
         })
     };
 }
+const getAllUsers = async () =>{
+    const user = await db.User.findAll({
+        where: {
+            status: true,
+        }
+    })
+    return {
+        code: 200,
+        message: user,
+    }
+}
+
+const findUsers = async (req) =>{
+    const { name, status, login_before, login_after } = req.query
+    const filter = {}
+    try {
+        if (status !== undefined) {
+            filter.status = status === 'true' ? true : false;}
+        if (name) {
+            filter.name = {[db.Sequelize.Op.like]: `%${name}%`};
+        }
+        if (login_before) {
+            filter.createdAt = {[db.Sequelize.Op.lte]: new Date(login_before)};
+        }
+        if (login_after) {
+            filter.createdAt = {[db.Sequelize.Op.gte]: new Date(login_after)};
+        }
+    
+        
+    } catch (error) {
+        console.log(error)
+        return {
+            code: 400,
+            message:'Error'
+        }
+    }
+    const user = await db.User.findAll({
+        where: filter
+    });
+
+    return{
+        code: 200,
+        message: user,
+    }
+}
+
+
 
 const updateUser = async (req) => {
     const user = db.User.findOne({
@@ -107,4 +156,6 @@ export default {
     getUserById,
     updateUser,
     deleteUser,
+    getAllUsers,
+    findUsers,
 }
