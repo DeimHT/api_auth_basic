@@ -101,7 +101,75 @@ const findUsers = async (req) =>{
     }
 }
 
+const bulkCreate = async (req) => {
+    const users = req.body.users;
 
+    if (!Array.isArray(users)) {
+        return {
+            code: 400,
+            message: 'Invalid input, no users inputed'
+        };
+    }
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const user of users) {
+        const {
+            name,
+            email,
+            password,
+            password_second,
+            cellphone
+        } = user;
+
+        if (password !== password_second) {
+            errorCount++;
+            continue;
+        }
+
+        const existingUser = await db.User.findOne({
+            where: {
+                email: email,
+            }
+        });
+        
+        const existingUser2 = await db.User.findOne({
+            where: {
+                cellphone: cellphone,
+            }
+        });
+
+        if (existingUser) {
+            errorCount++;
+            continue;
+        }
+        if (existingUser2) {
+            errorCount++;
+            continue;
+        }
+
+        const encryptedPassword = await bcrypt.hash(password, 10);
+
+        try {
+            await db.User.create({
+                name,
+                email,
+                password: encryptedPassword,
+                cellphone,
+                status: true
+            });
+            successCount++;
+        } catch (error) {
+            errorCount++;
+        }
+    }
+
+    return {
+        code: 200,
+        message: `Successfully registered: ${successCount} users, Failed to register: ${errorCount} users`
+    };
+}
 
 const updateUser = async (req) => {
     const user = db.User.findOne({
@@ -158,4 +226,5 @@ export default {
     deleteUser,
     getAllUsers,
     findUsers,
+    bulkCreate,
 }

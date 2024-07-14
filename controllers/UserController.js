@@ -21,6 +21,11 @@ router.get('/findUsers', async (req, res) => {
     res.status(response.code).json(response.message);
 });
 
+router.post('/bulkCreate', async (req, res) => {
+    const response = await UserService.bulkCreate(req);
+    res.status(response.code).json(response.message);
+});
+
 router.get(
     '/:id',
     [
@@ -32,7 +37,7 @@ router.get(
     async (req, res) => {
         const response = await UserService.getUserById(req.params.id);
         res.status(response.code).json(response.message);
-    });
+});
 
 router.put('/:id', [
         NumberMiddleware.isNumber,
@@ -43,7 +48,7 @@ router.put('/:id', [
     async(req, res) => {
         const response = await UserService.updateUser(req);
         res.status(response.code).json(response.message);
-    });
+});
 
 router.delete('/:id',
     [
@@ -55,6 +60,6 @@ router.delete('/:id',
     async (req, res) => {
        const response = await UserService.deleteUser(req.params.id);
        res.status(response.code).json(response.message);
-    });
+});
 
 export default router;
